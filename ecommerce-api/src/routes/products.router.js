@@ -31,6 +31,11 @@ router.get("/:pid", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const newProduct = await productManager.create(req.body);
+
+    const io = req.app.get("io");
+    const products = await productManager.getAll();
+    io.emit("productsUpdated", products);
+
     res.status(201).json(newProduct);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -41,6 +46,11 @@ router.put("/:pid", async (req, res) => {
   try {
     const { pid } = req.params;
     const updatedProduct = await productManager.update(pid, req.body);
+
+    const io = req.app.get("io");
+    const products = await productManager.getAll();
+    io.emit("productsUpdated", products);
+
     res.json(updatedProduct);
   } catch (error) {
     if (error.message === "Producto no encontrado") {
@@ -54,6 +64,11 @@ router.delete("/:pid", async (req, res) => {
   try {
     const { pid } = req.params;
     await productManager.delete(pid);
+
+    const io = req.app.get("io");
+    const products = await productManager.getAll();
+    io.emit("productsUpdated", products);
+
     res.status(204).end();
   } catch (error) {
     if (error.message === "Producto no encontrado") {
